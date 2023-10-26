@@ -135,3 +135,10 @@ seem helpful.
 ## License
 
 It's MIT, you can read the `LICENSE` file for more.
+
+## References
+
+I learned a lot from the
+[Wikipedia article on entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
+and this
+[example implementation of finding entropy](https://www.drdobbs.com/security/entropy/184408492).
