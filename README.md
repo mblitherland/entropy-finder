@@ -25,6 +25,7 @@ Usage: find_entropy.rb [options] [<files and/or directories>]
     -i, --include VALUE              Scan only files matching the value or values, e.g. ".cs" or ".rb,.json"
     -e, --exclude VALUE              Do not scan files matching extension e.g. ".css" or ".yml,.html"
     -x, --exclude_dir VALUE          Do not scan files within matching directories e.g. "bin" or "obj,cache"
+    -m, --max_lines VALUE            Stop processing file once max_lines have been found (default: 15)
 ```
 The default threshold of 4.2 is pretty low and will likely identify lots of strings that aren't
 secret (like URLs or complex string concatinations). I've found most true secrets start around
@@ -65,7 +66,12 @@ sample.rb
   ... and so on.
 ```
 
-I find this fun to do. I'm not sure why. If we try it with a slightly lower value we can see some
+I find this fun to do. I'm not sure why. You'll notice that it stops after hitting 15 lines
+which is the default before it'll move on to the next file. Set to a very high value if you
+want to see them all. I can't think of a use case for that so I didn't include a way to 
+skip the check.
+
+If we try it the same query with a slightly lower value we can see some
 other strings that come close to being suspiciously secret.
 
 ```bash
@@ -82,6 +88,12 @@ sample.rb
 URLs and complex concatinations are things that show up a lot when I use the tool, so when I get
 more results than I want I'll slowly raise the threshold until I'm seeing a manageable amount of
 information.
+
+Included in the sample file is the same secret from line 10 but broken up across a number of
+lines. This is an example of something that would fool the finder. Individually none of those
+strings is higher than 2.9 in entropy, but 5.6 when added together. This script is designed
+to help you find high entropy stings, but a malicious user can easly get around this sort
+of detection.
 
 ### Running against a directory
 

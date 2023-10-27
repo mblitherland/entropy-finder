@@ -4,7 +4,7 @@
 require 'optparse'
 
 def examine_file(file)
-  found = false
+  found = 0
   row = 0
   File.open(file) do |handle|
     handle.each_line do |full_line|
@@ -14,11 +14,14 @@ def examine_file(file)
           value = entropy(word)
           next unless value > @options[:threshold]
 
-          unless found
-            found = true
-            print("#{file}\n")
+          print("#{file}\n") if found == 0
+          found += 1
+          if found > @options[:maximum]
+            print("  ... More than #{@options[:maximum]} matches found, skipping to next file\n")
+            return
+          else
+            print("  Line:#{row} (#{value.round(1)}) '#{word.length > 72 ? "#{word[0, 72]}..." : word}'\n")
           end
-          print("  Line:#{row} (#{value.round(1)}) '#{word.length > 72 ? "#{word[0, 72]}..." : word}'\n")
         end
       rescue ArgumentError
         next
@@ -77,8 +80,10 @@ def expand_dir(dir)
   end
 end
 
+DEFAULT_MAX = 15
 DEFAULT_THRESHOLD = 4.2
 @options = {
+  maximum: DEFAULT_MAX,
   threshold: DEFAULT_THRESHOLD
 }
 
@@ -97,13 +102,21 @@ OptionParser.new do |opt|
   end
   opt.on('-e VALUE',
          '--exclude VALUE',
-         'Do not scan files matching extension e.g. ".css" or ".yml,.html"') do |e|
+         'Do not scan files matching extension e.g. ".css" or ".yml,.html"',
+         String) do |e|
     @options[:exclude] = e
   end
   opt.on('-x VALUE',
          '--exclude_dir VALUE',
-         'Do not scan files within matching directories e.g. "bin" or "obj,cache"') do |x|
+         'Do not scan files within matching directories e.g. "bin" or "obj,cache"',
+         String) do |x|
     @options[:exclude_dir] = x
+  end
+  opt.on('-m VALUE',
+         '--max_lines VALUE',
+         "Stop processing file once max_lines have been found (default: #{DEFAULT_MAX})",
+         Integer) do |m|
+    @options[:maximum] = m
   end
 end.parse!
 
